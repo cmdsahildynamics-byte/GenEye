@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sahil Dynamics Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h2>Sahil Dynamics Remote Monitoring</h2>
+    Status: <span id="status">—</span> | Last update: <span id="timestamp">—</span>
+  </header>
+
+  <div class="tabs">
+    <button class="active" onclick="showTab('bi')">BI</button>
+    <button onclick="showTab('live')">Live</button>
+    <button onclick="showTab('mis')">MIS</button>
+    <button onclick="showTab('settings')">Settings</button>
+  </div>
+
+  <!-- BI -->
+  <section id="bi" class="tab-content active">
+    <div class="grid">
+      <div class="card"><div class="value" id="hours">—</div><div class="label">Run Hours</div></div>
+      <div class="card"><div class="value" id="kwh">—</div><div class="label">Energy (kWh)</div></div>
+      <div class="card"><div class="value" id="fuel">—</div><div class="label">Fuel Level (%)</div></div>
+    </div>
+  </section>
+
+  <!-- Live -->
+  <section id="live" class="tab-content">
+    <div class="grid">
+      <div class="card"><div class="value" id="rpm">—</div><div class="label">Engine RPM</div></div>
+      <div class="card"><div class="value" id="temp">—</div><div class="label">Coolant Temp (°C)</div></div>
+      <div class="card"><div class="value" id="voltage">—</div><div class="label">Battery Voltage (V)</div></div>
+      <div class="card"><div class="value" id="freq">—</div><div class="label">Frequency (Hz)</div></div>
+      <div class="card"><div class="value" id="power">—</div><div class="label">Power (kVA)</div></div>
+    </div>
+  </section>
+
+  <!-- MIS -->
+  <section id="mis" class="tab-content">
+    <div class="grid">
+      <div class="card"><canvas id="runHoursChart"></canvas><div class="label">Run Hours Trend</div></div>
+      <div class="card"><canvas id="fuelChart"></canvas><div class="label">Fuel Level Trend</div></div>
+      <div class="card"><canvas id="powerChart"></canvas><div class="label">Power (kVA) Trend</div></div>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section id="settings" class="tab-content">
+    <ul>
+      <li>Device ID: 02500924120800025541</li>
+      <li>Customer: Sahil Dynamics</li>
+      <li>Tag: Genset 1</li>
+    </ul>
+  </section>
+
+  <script>
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tabs button')[["bi","live","mis","settings"].indexOf(id)].classList.add('active');
+    }
+
+    async function refreshData(){
+      const res = await fetch('/data');
+      const d = await res.json();
+      document.getElementById("status").textContent = d.Status;
+      document.getElementById("timestamp").textContent = d.Timestamp;
+      document.getElementById("hours").textContent = d.Running_Hours + " h";
+      document.getElementById("kwh").textContent   = d.Power_kVA + " kVA";
+      document.getElementById("fuel").textContent  = d.Fuel_Level + " %";
+      document.getElementById("rpm").textContent   = d.Engine_RPM + " rpm";
+      document.getElementById("temp").textContent  = d.Coolant_Temp + " °C";
+      document.getElementById("voltage").textContent = d.Battery_Voltage + " V";
+      document.getElementById("freq").textContent  = d.Frequency + " Hz";
+      document.getElementById("power").textContent = d.Power_kVA + " kVA";
+    }
+
+    async function fetchHistory(){
+      const res = await fetch('/history');
+      const d = await res.json();
+      const ts = d.Timestamp || [];
+      const rh = d.Running_Hours || [];
+      const fl = d.Fuel_Level || [];
+      const pk = d.Power_kVA || [];
+      const opts = { responsive:true, plugins:{ legend:{ display:false } } };
+
+      new Chart(document.getElementById('runHoursChart'), { type:'line', data:{ labels:ts, datasets:[{ data:rh, borderColor:'#0078d7' }] }, options:opts });
+      new Chart(document.getElementById('fuelChart'), { type:'line', data:{ labels:ts, datasets:[{ data:fl, borderColor:'#28a745' }] }, options:opts });
+      new Chart(document.getElementById('powerChart'), { type:'line', data:{ labels:ts, datasets:[{ data:pk, borderColor:'#ff9800' }] }, options:opts });
+    }
+
+    refreshData();
+    fetchHistory();
+    setInterval(refreshData, 5000);
+  </script>
+</body>
+</html>

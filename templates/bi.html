@@ -1,0 +1,51 @@
+{% include 'layout.html' %}
+{% block content %}
+<h2>Business Intelligence</h2>
+<div class="grid">
+  <div class="card"><div class="value" id="hours">—</div><div class="label">Run Hours</div></div>
+  <div class="card"><div class="value" id="kwh">—</div><div class="label">Energy (kWh)</div></div>
+  <div class="card"><div class="value" id="fuel">—</div><div class="label">Fuel Level (%)</div></div>
+  <div class="card"><div class="value">0%</div><div class="label">Productivity (Last Week)</div></div>
+  <div class="card"><div class="value">0</div><div class="label">Power Factor (AVG)</div></div>
+  <div class="card"><div class="value">—</div><div class="label">Service Due</div></div>
+
+  <div class="card" style="grid-column: span 2;">
+    <div class="value">Recent Alerts</div>
+    <ul class="alerts" id="alerts"></ul>
+  </div>
+</div>
+
+<script>
+  async function refreshData(){
+    const res = await fetch('/data');
+    const d = await res.json();
+    document.getElementById("hours").textContent = (d.Running_Hours ?? "—") + (d.Running_Hours != null ? " h" : "");
+    // Replace with Energy_kWh when you map it in backend; placeholder uses Power_kVA
+    document.getElementById("kwh").textContent   = (d.Power_kVA ?? "—") + (d.Power_kVA != null ? " kVA" : "");
+    document.getElementById("fuel").textContent  = (d.Fuel_Level ?? "—") + (d.Fuel_Level != null ? " %" : "");
+  }
+
+  async function refreshAlerts(){
+    const res = await fetch('/alerts');
+    const list = await res.json();
+    const ul = document.getElementById("alerts");
+    ul.innerHTML = "";
+    list.forEach(a => {
+      const li = document.createElement("li");
+      const msg = document.createElement("span");
+      msg.textContent = a.msg;
+      const ts = document.createElement("span");
+      ts.className = "ts";
+      ts.textContent = a.ts;
+      li.appendChild(msg);
+      li.appendChild(ts);
+      ul.appendChild(li);
+    });
+  }
+
+  refreshData();
+  refreshAlerts();
+  setInterval(refreshData, 5000);
+  setInterval(refreshAlerts, 10000);
+</script>
+{% endblock %}

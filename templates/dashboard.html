@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Sahil Dynamics | Remote Monitoring</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { margin:0; font-family:Segoe UI, Arial, sans-serif; background:linear-gradient(135deg,#0a2a66,#0f4c9a); color:#fff; }
+    .sidebar { position:fixed; left:0; top:0; bottom:0; width:220px; background:rgba(0,0,0,0.4); padding:20px; }
+    .sidebar h2 { margin:0 0 20px; font-size:18px; }
+    .nav-item { margin:10px 0; cursor:pointer; }
+    .topbar { margin-left:220px; padding:15px 25px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); }
+    .status.on { color:lime; font-weight:bold; }
+    .status.off { color:red; font-weight:bold; }
+    .content { margin-left:220px; padding:20px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+    .card { background:#fff; color:#000; border-radius:10px; padding:15px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+    .value { font-size:1.4em; margin:10px 0; }
+    .label { font-size:0.9em; color:#555; }
+    .footer { text-align:center; padding:20px; }
+    button { padding:10px 20px; border:none; background:#0078d7; color:#fff; border-radius:5px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>Sahil Dynamics</h2>
+    <div class="nav-item">BI</div>
+    <div class="nav-item">Live Monitoring</div>
+    <div class="nav-item">MIS</div>
+    <div class="nav-item">User Settings</div>
+  </aside>
+
+  <header class="topbar">
+    <div>Welcome to Sahil Dynamics remote monitoring</div>
+    <div>
+      <span id="status" class="status off">OFF</span> | Last update: <span id="timestamp">—</span>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="grid">
+      <div class="card"><div class="value" id="voltage">—</div><div class="label">Battery Voltage</div></div>
+      <div class="card"><div class="value" id="temp">—</div><div class="label">Coolant Temp</div></div>
+      <div class="card"><div class="value" id="rpm">—</div><div class="label">Engine RPM</div></div>
+      <div class="card"><div class="value" id="freq">—</div><div class="label">Frequency</div></div>
+      <div class="card"><div class="value" id="fuel">—</div><div class="label">Fuel Level</div></div>
+      <div class="card"><div class="value" id="starts">—</div><div class="label">No. of Starts</div></div>
+      <div class="card"><div class="value" id="power">—</div><div class="label">Power (kVA)</div></div>
+      <div class="card"><div class="value" id="hours">—</div><div class="label">Running Hours</div></div>
+    </div>
+    <div class="footer"><a href="/download"><button>Download CSV</button></a></div>
+  </main>
+
+  <script>
+    async function refreshData(){
+      const res = await fetch('/data');
+      const d = await res.json();
+
+      document.getElementById("voltage").textContent = d.Battery_Voltage + " V";
+      document.getElementById("temp").textContent    = d.Coolant_Temp + " °C";
+      document.getElementById("rpm").textContent     = d.Engine_RPM + " rpm";
+      document.getElementById("freq").textContent    = d.Frequency + " Hz";
+      document.getElementById("fuel").textContent    = d.Fuel_Level + " %";
+      document.getElementById("starts").textContent  = d.No_of_Starts;
+      document.getElementById("power").textContent   = d.Power_kVA + " kVA";
+      document.getElementById("hours").textContent   = d.Running_Hours + " h";
+
+      const statusEl = document.getElementById("status");
+      statusEl.textContent = d.Status;
+      statusEl.className = "status " + (d.Status === "ON" ? "on" : "off");
+
+      document.getElementById("timestamp").textContent = d.Timestamp;
+    }
+
+    refreshData();
+    setInterval(refreshData, 5000);
+  </script>
+</body>
+</html>

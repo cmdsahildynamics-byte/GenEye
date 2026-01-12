@@ -1,0 +1,31 @@
+{% include 'layout.html' %}
+{% block content %}
+<h2>Live Monitoring</h2>
+<div class="grid">
+  <div class="card"><div class="value" id="rpm">—</div><div class="label">Engine RPM</div></div>
+  <div class="card"><div class="value" id="temp">—</div><div class="label">Coolant Temp (°C)</div></div>
+  <div class="card"><div class="value" id="power">—</div><div class="label">Power (kVA)</div></div>
+  <div class="card"><div class="value" id="freq">—</div><div class="label">Frequency (Hz)</div></div>
+  <div class="card"><div class="value" id="voltage">—</div><div class="label">Battery Voltage (V)</div></div>
+  <div class="card"><div class="value" id="fuel">—</div><div class="label">Fuel Level (%)</div></div>
+  <div class="card"><div class="value" id="starts">—</div><div class="label">No. of Starts</div></div>
+  <div class="card"><div class="value" id="hours">—</div><div class="label">Running Hours (h)</div></div>
+</div>
+
+<script>
+  async function refreshData(){
+    const res = await fetch('/data');
+    const d = await res.json();
+    document.getElementById("voltage").textContent = (d.Battery_Voltage ?? "—") + (d.Battery_Voltage != null ? " V" : "");
+    document.getElementById("temp").textContent    = (d.Coolant_Temp ?? "—") + (d.Coolant_Temp != null ? " °C" : "");
+    document.getElementById("rpm").textContent     = (d.Engine_RPM ?? "—") + (d.Engine_RPM != null ? " rpm" : "");
+    document.getElementById("freq").textContent    = (d.Frequency ?? "—") + (d.Frequency != null ? " Hz" : "");
+    document.getElementById("fuel").textContent    = (d.Fuel_Level ?? "—") + (d.Fuel_Level != null ? " %" : "");
+    document.getElementById("starts").textContent  = d.No_of_Starts ?? "—";
+    document.getElementById("power").textContent   = (d.Power_kVA ?? "—") + (d.Power_kVA != null ? " kVA" : "");
+    document.getElementById("hours").textContent   = (d.Running_Hours ?? "—") + (d.Running_Hours != null ? " h" : "");
+  }
+  refreshData();
+  setInterval(refreshData, 5000);
+</script>
+{% endblock %}

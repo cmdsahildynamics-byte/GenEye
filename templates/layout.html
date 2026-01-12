@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Sahil Dynamics</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body { margin:0; font-family:Segoe UI, sans-serif; background:#f0f4f8; color:#111; }
+    .sidebar { position:fixed; left:0; top:0; bottom:0; width:220px; background:#0a2a66; color:#fff; padding:20px; }
+    .sidebar h2 { margin:0 0 20px; font-size:18px; }
+    .nav-item { margin:10px 0; }
+    .nav-item a { color:#fff; text-decoration:none; }
+    .topbar { margin-left:220px; padding:15px 25px; background:#0f4c9a; color:#fff; display:flex; justify-content:space-between; align-items:center; }
+    .content { margin-left:220px; padding:20px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+    .card { background:#fff; padding:15px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; }
+    .value { font-size:1.4em; margin:10px 0; }
+    .label { font-size:0.9em; color:#555; }
+    button { padding:10px 20px; border:none; background:#0078d7; color:#fff; border-radius:5px; cursor:pointer; }
+    .status.on { color:#28a745; font-weight:bold; }
+    .status.off { color:#ff4d4f; font-weight:bold; }
+    ul.alerts { list-style:none; padding:0; margin:0; text-align:left; }
+    ul.alerts li { padding:6px 8px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; }
+    ul.alerts li .ts { color:#777; font-size:0.85em; margin-left:12px; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>Sahil Dynamics</h2>
+    <div class="nav-item"><a href="/bi">BI</a></div>
+    <div class="nav-item"><a href="/live">Live Monitoring</a></div>
+    <div class="nav-item"><a href="/mis">MIS</a></div>
+    <div class="nav-item"><a href="/settings">User Settings</a></div>
+  </aside>
+  <header class="topbar">
+    <div>Welcome to Sahil Dynamics remote monitoring</div>
+    <div>
+      Status: <span id="status" class="status off">OFF</span> | Last update: <span id="timestamp">—</span>
+    </div>
+  </header>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    // Update topbar status and timestamp globally
+    async function refreshHeader(){
+      try {
+        const res = await fetch('/data');
+        const d = await res.json();
+        const statusEl = document.getElementById("status");
+        statusEl.textContent = d.Status;
+        statusEl.className = "status " + (d.Status === "ON" ? "on" : "off");
+        document.getElementById("timestamp").textContent = d.Timestamp;
+      } catch(e) {}
+    }
+    refreshHeader();
+    setInterval(refreshHeader, 5000);
+  </script>
+</body>
+</html>

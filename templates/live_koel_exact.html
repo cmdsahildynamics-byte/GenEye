@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Sahil Dynamics Gen Eye Remote Monitoring System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --blue: #0f4c9a;
+      --nav: #0a2a66;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --green: #28a745;
+      --red: #ff4d4f;
+      --border: #e5e7eb;
+      --accent: #0078d7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Segoe UI, Arial, sans-serif; background: var(--bg); color: var(--text); }
+
+    /* Sidebar (SD left panel) */
+    .sidebar {
+      position: fixed; top: 0; bottom: 0; left: 0; width: 260px;
+      background: var(--nav); color: #fff; padding: 18px 18px 24px;
+    }
+    .brand { font-weight: 700; font-size: 16px; margin-bottom: 16px; }
+    .device-box {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 12px; margin-bottom: 18px; font-size: 13px; line-height: 1.6;
+    }
+    .menu a { display: block; color: #fff; text-decoration: none; padding: 8px 0; font-size: 14px; }
+    .menu a:hover { text-decoration: underline; }
+
+    /* Header */
+    .header {
+      margin-left: 260px; background: var(--blue); color: #fff;
+      padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;
+    }
+    .header .title { font-weight: 600; letter-spacing: 0.2px; }
+    .header .krm { opacity: 0.9; }
+
+    /* Content */
+    .content { margin-left: 260px; padding: 16px 20px; }
+
+    /* Status banner */
+    .status-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #eaf6ef; border: 1px solid #d5ead9; color: var(--green);
+      padding: 10px 14px; border-radius: 6px; font-weight: 600; margin-bottom: 14px;
+    }
+    .status-banner .last-updated { color: var(--muted); font-weight: 500; }
+
+    /* Inline metrics grid */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .value { font-size: 18px; font-weight: 600; }
+
+    /* Gauges row */
+    .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .gauge-card { display: grid; grid-template-columns: 140px 1fr; align-items: center; gap: 16px; }
+    .gauge {
+      width: 140px; height: 140px; border-radius: 50%;
+      background: conic-gradient(var(--accent) calc(var(--pct)*1%), #e5e7eb 0);
+      display: grid; place-items: center; position: relative;
+    }
+    .gauge::after {
+      content: ""; position: absolute; width: 92px; height: 92px; border-radius: 50%; background: #fff;
+    }
+    .gauge .num { position: relative; z-index: 1; font-size: 20px; font-weight: 700; color: var(--text); }
+    .legend .title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .legend .sub { font-size: 12px; color: var(--muted); }
+
+    /* Health parameters row */
+    .health { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .health .active { color: var(--green); font-weight: 700; }
+
+    /* Warnings list */
+    .warnings .value { margin-bottom: 8px; }
+    ul.alerts { list-style: none; padding: 0; margin: 0; }
+    ul.alerts li { padding: 6px 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+    ul.alerts li .ts { color: var(--muted); font-size: 12px; margin-left: 12px; }
+
+    /* Responsive */
+    @media (max-width: 1024px) { .metrics { grid-template-columns: repeat(2, 1fr); } .gauges { grid-template-columns: 1fr; } .health { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .metrics { grid-template-columns: 1fr; } .gauge-card { grid-template-columns: 1fr; justify-items: center; } }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">Sahil Dynamics Gen Eye Remote Monitoring</div>
+    <div class="device-box">
+      HS Trading<br/>
+      Device Id: <strong>61001797</strong><br/>
+      Sr No:<br/>
+      TAG:
+    </div>
+    <nav class="menu">
+      <a href="#">BI</a>
+      <a href="#">Live Monitoring</a>
+      <a href="#">MIS</a>
+      <a href="#">User Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="title">WELCOME TO SAHIL DYNBAMICS GEN EYE REMOTE MONITORING SYSTEM.</div>
+    <div class="ESN">ESN No: 84582569-CUMMINS </div>
+  </header>
+
+  <main class="content">
+    <!-- Status banner -->
+    <div class="status-banner">
+      <div>Genset Status: <span id="status" class="status-off">OFF</span></div>
+      <div class="last-updated">Last Updated: <span id="timestamp">—</span></div>
+    </div>
+
+    <!-- Metrics inline cards (exact sd labels/order) -->
+    <section class="metrics">
+      <div class="card"><div class="label">P.F.</div><div class="value" id="pf">0.95</div></div>
+      <div class="card"><div class="label">Power (K.W)</div><div class="value" id="pkw">0.00</div></div>
+      <div class="card"><div class="label">KWH</div><div class="value" id="kwh">0.00</div></div>
+      <div class="card"><div class="label">Batt Vtg</div><div class="value" id="voltage">—</div></div>
+      <div class="card"><div class="label">Fuel Level</div><div class="value" id="fuel">—</div></div>
+      <div class="card"><div class="label">Oil Temp</div><div class="value" id="oiltemp">0°C</div></div>
+      <div class="card"><div class="label">Run Hours</div><div class="value" id="hours">—</div></div>
+      <div class="card"><div class="label">Frequency</div><div class="value" id="freq">—</div></div>
+      <div class="card"><div class="label">Oil Pressure</div><div class="value" id="oilpress">0.00 kg/cm²</div></div>
+    </section>
+
+    <!-- Gauges (RPM, Coolant Temp) -->
+    <section class="gauges">
+      <div class="card gauge-card">
+        <div class="gauge" id="rpmGauge" style="--pct: 0;">
+          <div class="num" id="rpmNum">0</div>
+        </div>
+        <div class="legend">
+          <div class="title">Engine RPM</div>
+          <div class="sub">Gauge reading</div>
+        </div>
+      </div>
+      <div class="card gauge-card">
+        <div class="gauge" id="tempGauge" style="--pct: 0;">
+          <div class="num" id="tempNum">0°C</div>
+        </div>
+        <div class="legend">
+          <div class="title">Engine Coolant Temp</div>
+          <div class="sub">Thermometer</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Health parameters -->
+    <section class="health">
+      <div class="card"><div class="label">Battery</div><div class="value active" id="healthBattery">Active</div></div>
+      <div class="card"><div class="label">Engine</div><div class="value active" id="healthEngine">Active</div></div>
+      <div class="card"><div class="label">Alternator</div><div class="value active" id="healthAlternator">Active</div></div>
+    </section>
+
+    <!-- Last Warning -->
+    <section class="card warnings">
+      <div class="value">Last Warning</div>
+      <ul class="alerts" id="alerts"></ul>
+    </section>
+  </main>
+
+  <script>
+    // Helpers
+    function safe(val, unit = "") { return val == null ? "—" : (val + unit); }
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function rpmToPct(rpm){ return clamp((rpm / 1800) * 100, 0, 100); }   // 0..1800 rpm -> 0..100%
+    function tempToPct(temp){ return clamp((temp / 110) * 100, 0, 100); } // 0..110°C -> 0..100%
+
+    async function refreshData(){
+      try {
+        const res = await fetch('/data');
+        const d = await res.json();
+
+        // Status banner
+        const statusEl = document.getElementById("status");
+        statusEl.textContent = d.Status || "OFF";
+        statusEl.className = (d.Status === "ON") ? "status-on" : "status-off";
+        document.getElementById("timestamp").textContent = d.Timestamp || "—";
+
+        // Metrics
+        const pf = (d.Power_Factor != null) ? d.Power_Factor : 0.95;
+        const pkw = (d.Power_kW != null) ? d.Power_kW : (d.Power_kVA != null ? Math.round(d.Power_kVA * 0.9 * 100) / 100 : 0);
+        const kwh = (d.Energy_kWh != null) ? d.Energy_kWh : 0;
+
+        document.getElementById("pf").textContent       = safe(pf);
+        document.getElementById("pkw").textContent      = safe(pkw);
+        document.getElementById("kwh").textContent      = safe(kwh);
+        document.getElementById("voltage").textContent  = safe(d.Battery_Voltage, "V");
+        document.getElementById("fuel").textContent     = safe(d.Fuel_Level, "%");
+        document.getElementById("oiltemp").textContent  = safe(d.Oil_Temp, "°C");
+        document.getElementById("hours").textContent    = safe(d.Running_Hours);
+        document.getElementById("freq").textContent     = safe(d.Frequency, " Hz");
+        document.getElementById("oilpress").textContent = (d.Oil_Pressure == null) ? "0.00 kg/cm²" : (d.Oil_Pressure.toFixed(2) + " kg/cm²");
+
+        // Gauges
+        const rpm = d.Engine_RPM ?? 0;
+        const temp = d.Coolant_Temp ?? 0;
+        document.getElementById("rpmNum").textContent = Math.round(rpm);
+        document.getElementById("tempNum").textContent= Math.round(temp) + "°C";
+        document.getElementById("rpmGauge").style.setProperty("--pct", rpmToPct(rpm));
+        document.getElementById("tempGauge").style.setProperty("--pct", tempToPct(temp));
+
+        // Health parameters (simple demo: mark Active if value present)
+        document.getElementById("healthBattery").textContent   = (d.Battery_Voltage != null ? "Active" : "—");
+        document.getElementById("healthEngine").textContent    = (d.Engine_RPM != null ? "Active" : "—");
+        document.getElementById("healthAlternator").textContent= (d.Frequency != null ? "Active" : "—");
+      } catch(e) {}
+    }
+
+    async function refreshAlerts(){
+      try {
+        const res = await fetch('/alerts');
+        const list = await res.json();
+        const ul = document.getElementById("alerts");
+        ul.innerHTML = "";
+        list.forEach(a => {
+          const li = document.createElement("li");
+          const msg = document.createElement("span");
+          msg.textContent = a.msg;
+          const ts = document.createElement("span");
+          ts.className = "ts";
+          ts.textContent = a.ts;
+          li.appendChild(msg);
+          li.appendChild(ts);
+          ul.appendChild(li);
+        });
+      } catch(e) {}
+    }
+
+    refreshData();
+    refreshAlerts();
+    setInterval(refreshData, 5000);
+    setInterval(refreshAlerts, 10000);
+  </script>
+</body>
+</html>

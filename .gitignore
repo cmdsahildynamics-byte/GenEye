@@ -1,0 +1,11 @@
+# Ignore system folders
+AppData/
+.vscode/
+.node-red/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore logs
+*.log

@@ -1,0 +1,56 @@
+{% include 'layout.html' %}
+{% block content %}
+<h2>Management Info System</h2>
+
+<div class="grid">
+  <div class="card">
+    <canvas id="runHoursChart"></canvas>
+    <div class="label">Run Hours Trend</div>
+  </div>
+  <div class="card">
+    <canvas id="fuelChart"></canvas>
+    <div class="label">Fuel Level Trend</div>
+  </div>
+  <div class="card">
+    <canvas id="powerChart"></canvas>
+    <div class="label">Power (kVA) Trend</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  async function fetchHistory(){
+    const res = await fetch('/history');
+    const d = await res.json();
+
+    const ts = d.Timestamp || [];
+    const rh = d.Running_Hours || [];
+    const fl = d.Fuel_Level || [];
+    const pk = d.Power_kVA || [];
+
+    const opts = { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ maxRotation:0 } } } };
+
+    new Chart(document.getElementById('runHoursChart'), {
+      type: 'line',
+      data: { labels: ts, datasets: [{ label:'Run Hours', data: rh, borderColor:'#0078d7', tension:0.2 }] },
+      options: opts
+    });
+
+    new Chart(document.getElementById('fuelChart'), {
+      type: 'line',
+      data: { labels: ts, datasets: [{ label:'Fuel %', data: fl, borderColor:'#28a745', tension:0.2 }] },
+      options: opts
+    });
+
+    new Chart(document.getElementById('powerChart'), {
+      type: 'line',
+      data: { labels: ts, datasets: [{ label:'Power kVA', data: pk, borderColor:'#ff9800', tension:0.2 }] },
+      options: opts
+    });
+  }
+
+  fetchHistory();
+  // Optional: refresh charts periodically
+  // setInterval(fetchHistory, 30000);
+</script>
+{% endblock %}
