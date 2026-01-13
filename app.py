@@ -38,7 +38,7 @@ def log_to_csv(decoded):
 # --- MQTT handlers ---
 def on_connect(client, userdata, flags, rc):
     print("Connected to broker with result code", rc)
-    client.subscribe("your/topic/here")
+    client.subscribe("your/topic/here")  # replace with your actual topic
 
 def on_message(client, userdata, msg):
     global latest_decoded
@@ -63,14 +63,14 @@ def start_mqtt():
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
-    client.connect("exceliot.com", 1883, 60)
+    client.connect("exceliot.com", 1883, 60)  # adjust host/port if needed
     client.loop_forever()
 
 # --- Background thread for MQTT ---
 def start_background():
     threading.Thread(target=start_mqtt, daemon=True).start()
 
-# Always start MQTT thread, even under Gunicorn
+# Always start MQTT, even under Gunicorn
 start_background()
 
 # --- Flask routes ---
